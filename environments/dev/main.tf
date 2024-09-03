@@ -11,5 +11,5 @@ module "key_vault" {
   key_vault_name      = "${var.key_vault_name}-${var.environment_name}"
   tenant_id           = var.tenant_id
   object_id           = var.object_id
-  environment         = var.environment_name
+
 }
