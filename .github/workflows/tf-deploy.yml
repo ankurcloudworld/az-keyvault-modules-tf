@@ -58,6 +58,7 @@ jobs:
         echo "## Initializing Terraform"
         REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
         ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        ls -la $ENV_PATH
         cd $ENV_PATH || exit 1
         terraform init \
           -backend-config="resource_group_name=${{ secrets.STATE_RESOURCE_GROUP_NAME }}" \
