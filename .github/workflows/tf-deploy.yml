@@ -25,10 +25,11 @@ jobs:
       run: |
         echo "## Setting Working Directory"
         ENV_PATH="./environments/${{ github.event.inputs.environment }}"
-        cd $ENV_PATH
+        echo "## Changing to directory $ENV_PATH"
+        cd $ENV_PATH || exit 1
+        echo "## Current Directory"
         pwd
-        ls -la
-        echo "## Current Directory Files:"
+        echo "## List Files"
         ls -la
 
     - name: Create terraform.tfvars
