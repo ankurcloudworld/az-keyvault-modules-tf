@@ -32,6 +32,12 @@ jobs:
         ls -la
         cat $ENV_PATH
 
+    - name: Set Working Directory
+      run: |
+        echo "## Setting Working Directory"
+        cd ./path-to-your-terraform-config-directory  # Update this path
+        pwd
+
     - name: Initialize Terraform
       run: |
         echo "## Initializing Terraform"
