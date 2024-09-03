@@ -61,13 +61,7 @@ jobs:
         cd $ENV_PATH || exit 1
         echo "## Listing Files in $ENV_PATH"
         ls -la
-        echo "## Backend Config:"
-        echo "resource_group_name=${{ secrets.STATE_RESOURCE_GROUP_NAME }}"
-        echo "storage_account_name=${{ secrets.STATE_STORAGE_ACCOUNT_NAME }}"
-        echo "container_name=${{ secrets.STATE_CONTAINER_NAME }}"
-        echo "key=${{ github.event.inputs.environment }}.tfstate"
-        terraform init -backend-config="resource_group_name=${{ secrets.STATE_RESOURCE_GROUP_NAME }}" -backend-config="storage_account_name=${{ secrets.STATE_STORAGE_ACCOUNT_NAME }}" -backend-config="container_name=${{ secrets.STATE_CONTAINER_NAME }}" -backend-config="key=${{ github.event.inputs.environment }}.tfstate"
-        echo "## Terraform Initialized"
+        terraform init
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
