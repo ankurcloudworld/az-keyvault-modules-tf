@@ -42,6 +42,7 @@ jobs:
         echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
         echo "tenant_id = \"${{ secrets.ARM_TENANT_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
         echo "object_id = \"${{ secrets.ARM_OBJECT_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
+        echo "environment_name = \"${{ github.event.inputs.environment }}\"" >> ${ENV_PATH}/terraform.tfvars
         echo "## Contents of terraform.tfvars:"
         cat ${ENV_PATH}/terraform.tfvars
 
