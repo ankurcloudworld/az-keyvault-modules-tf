@@ -22,8 +22,3 @@ variable "object_id" {
   description = "Object ID for Azure AD access policy."
   type        = string
 }
-
-variable "environment_name" {
-  description = "The environment name to use as a postfix for resources."
-  type        = string
-}
