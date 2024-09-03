@@ -39,5 +39,10 @@ variable "location" {
 variable "key_vault_name" {
   description = "The name of the Key Vault."
   type        = string
-  default     = "sample-key-vault-dev"
+  default     = "sample-key-vault"
+}
+
+variable "environment_name" {
+  description = "The environment name to use as a postfix for resources."
+  type        = string
 }
