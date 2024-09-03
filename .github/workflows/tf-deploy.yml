@@ -21,6 +21,13 @@ jobs:
       with:
         terraform_version: '1.4.0'
 
+    - name: Set Working Directory
+      run: |
+        echo "## Setting Working Directory"
+        cd ./environments/${{ github.event.inputs.environment }}
+        pwd
+        ls -la
+
     - name: Create terraform.tfvars
       run: |
         ENV_PATH="./environments/${{ github.event.inputs.environment }}/terraform.tfvars"
@@ -29,25 +36,15 @@ jobs:
         echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> $ENV_PATH
         echo "tenant_id = \"${{ secrets.ARM_TENANT_ID }}\"" >> $ENV_PATH
         echo "object_id = \"${{ secrets.ARM_OBJECT_ID }}\"" >> $ENV_PATH
-        ls -la
         cat $ENV_PATH
-
-    - name: Set Working Directory
-      run: |
-        echo "## Setting Working Directory"
-        cd ./path-to-your-terraform-config-directory  # Update this path
-        pwd
 
     - name: Initialize Terraform
       run: |
         echo "## Initializing Terraform"
+        BACKEND_CONFIG="./backend/${{ github.event.inputs.environment }}.tfbackend"
         REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-        ENVIRONMENT=${{ github.event.inputs.environment }}
         terraform init \
-          -backend-config="resource_group_name=${{ secrets.STATE_RESOURCE_GROUP_NAME }}" \
-          -backend-config="storage_account_name=${{ secrets.STATE_STORAGE_ACCOUNT_NAME }}" \
-          -backend-config="container_name=${{ secrets.STATE_CONTAINER_NAME }}" \
-          -backend-config="key=${REPO_NAME}/${ENVIRONMENT}/terraform.tfstate" \
+          -backend-config="${BACKEND_CONFIG}" \
           -reconfigure
         echo "## Terraform Initialized"
       env:
@@ -59,7 +56,7 @@ jobs:
     - name: Plan Terraform Changes
       run: |
         echo "## Planning Terraform Changes"
-        terraform plan -var-file="./environments/${{ github.event.inputs.environment }}/terraform.tfvars" -out=tfplan
+        terraform plan -var-file="./terraform.tfvars" -out=tfplan
         echo "## Terraform Plan Completed"
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
