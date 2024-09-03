@@ -81,6 +81,6 @@ jobs:
         TFVARS_FILE="${ENV_PATH}/${{ github.event.inputs.environment }}.tfvars"
         pwd
         ls -la
-        cat $TFVARS_FILE
+        cat dev.tfvars
         terraform plan -var-file="dev.tfvars" -out=tfplan
         echo "## Terraform Plan Completed"
