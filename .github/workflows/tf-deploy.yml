@@ -82,3 +82,12 @@ jobs:
         ls -la
         terraform plan -var-file=terraform.tfvars -out=tfplan
         echo "## Terraform Plan Completed"
+
+
+    - name: Apply Terraform Changes
+      run: |
+        echo "## Applying Terraform Changes"
+        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        cd $ENV_PATH
+        terraform apply -auto-approve tfplan
+        echo "## Terraform Apply Completed"
