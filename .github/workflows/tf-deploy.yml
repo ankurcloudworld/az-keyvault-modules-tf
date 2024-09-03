@@ -55,6 +55,8 @@ jobs:
     - name: Initialize Terraform
       run: |
         echo "## Initializing Terraform"
+        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        ls -la
         terraform init
         echo "## Terraform Initialized"
 
