@@ -78,8 +78,12 @@ jobs:
         cd $ENV_PATH
         ls -la
         terraform plan -var-file=terraform.tfvars -out=tfplan
-        echo "## Terraform Plan Completed"
-
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        
     - name: Apply Terraform Changes
       run: |
         echo "## Applying Terraform Changes"
@@ -87,3 +91,8 @@ jobs:
         cd $ENV_PATH
         terraform apply -auto-approve tfplan
         echo "## Terraform Apply Completed"
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
