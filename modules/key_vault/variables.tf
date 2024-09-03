@@ -23,7 +23,7 @@ variable "object_id" {
   type        = string
 }
 
-variable "environment" {
+variable "environment_name" {
   description = "The environment name to use as a postfix for resources."
   type        = string
 }
