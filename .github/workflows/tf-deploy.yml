@@ -80,3 +80,5 @@ jobs:
         cd $ENV_PATH || exit 1
         pwd
         ls -la
+        terraform plan -var-file=$TFVARS_FILE -out=tfplan
+        echo "## Terraform Plan Completed"
