@@ -1,5 +1,5 @@
 resource "azurerm_key_vault" "example" {
-  name                        = var.key_vault_name
+  name                        = "${var.key_vault_name}-${var.environment}"
   location                    = var.location
   resource_group_name         = var.resource_group_name
   sku_name                    = "standard"
