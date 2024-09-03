@@ -37,7 +37,7 @@ jobs:
       run: |
         echo "## Creating terraform.tfvars"
         ENV_PATH="./environments/${{ github.event.inputs.environment }}"
-        TFVARS_FILE="${ENV_PATH}/terraform_${{ github.event.inputs.environment }}.tfvars"
+        TFVARS_FILE="${ENV_PATH}/${{ github.event.inputs.environment }}.tfvars"
         echo "client_id = \"${{ secrets.ARM_CLIENT_ID }}\"" > $TFVARS_FILE
         echo "client_secret = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> $TFVARS_FILE
         echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> $TFVARS_FILE
@@ -59,7 +59,7 @@ jobs:
         echo "## Initializing Terraform"
         REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
         ENV_PATH="./environments/${{ github.event.inputs.environment }}"
-        TFVARS_FILE="${ENV_PATH}/terraform_${{ github.event.inputs.environment }}.tfvars"
+        TFVARS_FILE="${ENV_PATH}/${{ github.event.inputs.environment }}.tfvars"
         cd $ENV_PATH || exit 1
         terraform init \
           -backend-config="resource_group_name=${{ secrets.STATE_RESOURCE_GROUP_NAME }}" \
@@ -78,7 +78,7 @@ jobs:
         echo "## Planning Terraform Changes"
         ENV_PATH="./environments/${{ github.event.inputs.environment }}"
         cd $ENV_PATH || exit 1
-        TFVARS_FILE="${ENV_PATH}/terraform_${{ github.event.inputs.environment }}.tfvars"
+        TFVARS_FILE="${ENV_PATH}/${{ github.event.inputs.environment }}.tfvars"
         pwd
         ls -la
         cat $TFVARS_FILE
