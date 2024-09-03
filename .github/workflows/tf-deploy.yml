@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment environment (dev, preprod, prod)'
+        description: 'The environment to deploy to (dev, preprod, prod)'
         required: true
         default: 'dev'
 
@@ -32,46 +32,41 @@ jobs:
         pwd
         echo "## List Files"
         ls -la
-        echo "## Checking if Terraform configuration files exist"
-        if ls *.tf 1> /dev/null 2>&1; then
-          echo "Terraform configuration files found"
-          echo "TF_FILES_EXIST=true" >> $GITHUB_ENV
-        else
-          echo "No Terraform configuration files found"
-          echo "TF_FILES_EXIST=false" >> $GITHUB_ENV
-        fi
 
     - name: Create terraform.tfvars
-      if: env.TF_FILES_EXIST == 'true'
       run: |
         echo "## Creating terraform.tfvars"
-        echo "client_id = \"${{ secrets.ARM_CLIENT_ID }}\"" > terraform.tfvars
-        echo "client_secret = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> terraform.tfvars
-        echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> terraform.tfvars
-        echo "tenant_id = \"${{ secrets.ARM_TENANT_ID }}\"" >> terraform.tfvars
+        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        echo "client_id = \"${{ secrets.ARM_CLIENT_ID }}\"" > ${ENV_PATH}/terraform.tfvars
+        echo "client_secret = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> ${ENV_PATH}/terraform.tfvars
+        echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
+        echo "tenant_id = \"${{ secrets.ARM_TENANT_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
+        echo "object_id = \"${{ secrets.ARM_OBJECT_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
         echo "## Contents of terraform.tfvars:"
-        cat terraform.tfvars
+        cat ${ENV_PATH}/terraform.tfvars
+
+    - name: Verify terraform.tfvars Location
+      run: |
+        echo "## Verifying terraform.tfvars Location"
+        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        echo "## Listing Files in $ENV_PATH"
+        ls -la $ENV_PATH
 
     - name: Initialize Terraform
-      if: env.TF_FILES_EXIST == 'true'
       run: |
         echo "## Initializing Terraform"
         terraform init \
-          -backend-config="resource_group_name=${{ secrets.STATE_RESOURCE_GROUP_NAME }}" \
-          -backend-config="storage_account_name=${{ secrets.STATE_STORAGE_ACCOUNT_NAME }}" \
-          -backend-config="container_name=${{ secrets.STATE_CONTAINER_NAME }}" \
-          -backend-config="key=${{ github.event.inputs.environment }}/terraform.tfstate"
+          -backend-config="backend/${{ github.event.inputs.environment }}.tfbackend"
         echo "## Terraform Initialized"
 
     - name: Plan Terraform Changes
-      if: env.TF_FILES_EXIST == 'true'
       run: |
         echo "## Planning Terraform Changes"
-        terraform plan -var-file=terraform.tfvars -out=tfplan
+        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        terraform plan -var-file=${ENV_PATH}/terraform.tfvars -out=tfplan
         echo "## Terraform Plan Completed"
 
     - name: Apply Terraform Changes
-      if: env.TF_FILES_EXIST == 'true'
       run: |
         echo "## Applying Terraform Changes"
         terraform apply -auto-approve tfplan
