@@ -45,6 +45,13 @@ jobs:
         echo "## Contents of terraform.tfvars:"
         cat ${ENV_PATH}/terraform.tfvars
 
+    - name: Verify terraform.tfvars Location
+      run: |
+        echo "## Verifying terraform.tfvars Location"
+        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        echo "## Listing Files in $ENV_PATH"
+        ls -la $ENV_PATH
+
     - name: Initialize Terraform
       run: |
         echo "## Initializing Terraform"
@@ -55,6 +62,7 @@ jobs:
     - name: Plan Terraform Changes
       run: |
         echo "## Planning Terraform Changes"
+        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
         terraform plan -var-file=${ENV_PATH}/terraform.tfvars -out=tfplan
         echo "## Terraform Plan Completed"
 
