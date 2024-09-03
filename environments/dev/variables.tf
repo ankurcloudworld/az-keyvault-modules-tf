@@ -19,6 +19,11 @@ variable "tenant_id" {
   type        = string
 }
 
+variable "object_id" {
+  description = "The object ID of the user or service principal."
+  type        = string
+}
+
 variable "resource_group_name" {
   description = "Name of the resource group"
   type        = string
@@ -35,10 +40,4 @@ variable "key_vault_name" {
   description = "The name of the Key Vault."
   type        = string
   default     = "sample-key-vault-dev"
-}
-
-
-variable "object_id" {
-  description = "The object ID of the user or service principal to grant access to the Key Vault."
-  type        = string
 }
