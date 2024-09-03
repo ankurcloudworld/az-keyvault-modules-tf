@@ -37,14 +37,15 @@ jobs:
       run: |
         echo "## Creating terraform.tfvars"
         ENV_PATH="./environments/${{ github.event.inputs.environment }}"
-        echo "client_id = \"${{ secrets.ARM_CLIENT_ID }}\"" > ${ENV_PATH}/terraform.tfvars
-        echo "client_secret = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> ${ENV_PATH}/terraform.tfvars
-        echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
-        echo "tenant_id = \"${{ secrets.ARM_TENANT_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
-        echo "object_id = \"${{ secrets.ARM_OBJECT_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
-        echo "environment_name = \"${{ github.event.inputs.environment }}\"" >> ${ENV_PATH}/terraform.tfvars
+        TFVARS_FILE="${ENV_PATH}/terraform_${{ github.event.inputs.environment }}.tfvars"
+        echo "client_id = \"${{ secrets.ARM_CLIENT_ID }}\"" > $TFVARS_FILE
+        echo "client_secret = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> $TFVARS_FILE
+        echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> $TFVARS_FILE
+        echo "tenant_id = \"${{ secrets.ARM_TENANT_ID }}\"" >> $TFVARS_FILE
+        echo "object_id = \"${{ secrets.ARM_OBJECT_ID }}\"" >> $TFVARS_FILE
+        echo "environment_name = \"${{ github.event.inputs.environment }}\"" >> $TFVARS_FILE
         echo "## Contents of terraform.tfvars:"
-        cat ${ENV_PATH}/terraform.tfvars
+        cat $TFVARS_FILE
 
     - name: Verify terraform.tfvars Location
       run: |
@@ -57,6 +58,9 @@ jobs:
       run: |
         echo "## Initializing Terraform"
         REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        TFVARS_FILE="${ENV_PATH}/terraform_${{ github.event.inputs.environment }}.tfvars"
+        cd $ENV_PATH || exit 1
         terraform init \
           -backend-config="resource_group_name=${{ secrets.STATE_RESOURCE_GROUP_NAME }}" \
           -backend-config="storage_account_name=${{ secrets.STATE_STORAGE_ACCOUNT_NAME }}" \
