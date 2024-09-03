@@ -77,10 +77,9 @@ jobs:
       run: |
         echo "## Planning Terraform Changes"
         ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        TFVARS_FILE="${ENV_PATH}/terraform_${{ github.event.inputs.environment }}.tfvars"
+        cd $ENV_PATH || exit 1
         echo "## Environment Path: $ENV_PATH"
-        pwd
         ls -la
-        cd $ENV_PATH
-        ls -la
-        terraform plan -var-file=terraform.tfvars -out=tfplan
+        terraform plan -var-file=$TFVARS_FILE -out=tfplan
         echo "## Terraform Plan Completed"
