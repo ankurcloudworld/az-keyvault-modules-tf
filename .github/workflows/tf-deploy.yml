@@ -6,7 +6,7 @@ on:
       environment:
         description: 'The environment to deploy to (dev, preprod, prod)'
         required: true
-        default: dev
+        default: 'dev'
 
 jobs:
   terraform-execution:
@@ -22,6 +22,7 @@ jobs:
         terraform_version: '1.4.0'
 
     - name: Set Working Directory
+      id: set-working-directory
       run: |
         echo "## Setting Working Directory"
         ENV_PATH="./environments/${{ github.event.inputs.environment }}"
@@ -35,46 +36,30 @@ jobs:
     - name: Create terraform.tfvars
       run: |
         echo "## Creating terraform.tfvars"
-        echo "client_id = \"${{ secrets.ARM_CLIENT_ID }}\"" > terraform.tfvars
-        echo "client_secret = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> terraform.tfvars
-        echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> terraform.tfvars
-        echo "tenant_id = \"${{ secrets.ARM_TENANT_ID }}\"" >> terraform.tfvars
-        echo "object_id = \"${{ secrets.ARM_OBJECT_ID }}\"" >> terraform.tfvars
+        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        echo "client_id = \"${{ secrets.ARM_CLIENT_ID }}\"" > ${ENV_PATH}/terraform.tfvars
+        echo "client_secret = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> ${ENV_PATH}/terraform.tfvars
+        echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
+        echo "tenant_id = \"${{ secrets.ARM_TENANT_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
+        echo "object_id = \"${{ secrets.ARM_OBJECT_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
         echo "## Contents of terraform.tfvars:"
-        cat terraform.tfvars
+        cat ${ENV_PATH}/terraform.tfvars
 
     - name: Initialize Terraform
       run: |
         echo "## Initializing Terraform"
-        BACKEND_CONFIG="../../backend/${{ github.event.inputs.environment }}.tfbackend"
         terraform init \
-          -backend-config="${BACKEND_CONFIG}" \
-          -reconfigure
+          -backend-config="backend/${{ github.event.inputs.environment }}.tfbackend"
         echo "## Terraform Initialized"
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
     - name: Plan Terraform Changes
       run: |
         echo "## Planning Terraform Changes"
-        terraform plan -var-file=terraform.tfvars -out=tfplan
+        terraform plan -var-file=${ENV_PATH}/terraform.tfvars -out=tfplan
         echo "## Terraform Plan Completed"
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
     - name: Apply Terraform Changes
       run: |
         echo "## Applying Terraform Changes"
         terraform apply -auto-approve tfplan
         echo "## Terraform Apply Completed"
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
