@@ -62,9 +62,9 @@ jobs:
 
     - name: Plan Terraform Changes
       run: |
-        ls -la
         echo "## Planning Terraform Changes"
         ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        ls -la $ENV_PATH
         cd $ENV_PATH && terraform plan -var-file=terraform.tfvars -out=tfplan
         echo "## Terraform Plan Completed"
 
