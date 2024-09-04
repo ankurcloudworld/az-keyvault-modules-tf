@@ -106,7 +106,7 @@ jobs:
     - name: Approval before Apply
       uses: peter-evans/enable-pending-approval@v2
       with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        repo-token: ${{ secrets.TOKEN }}
         step-message: "Do you want to apply the Terraform changes?"
         pending-comment: true
 
