@@ -41,9 +41,9 @@ jobs:
         cat > ${ENV_PATH}/backend.tf << EOL
         terraform {
           backend "azurerm" {
-            resource_group_name  = "${{ secrets.AZURERM_RESOURCE_GROUP_NAME }}"
-            storage_account_name = "${{ secrets.AZURERM_STORAGE_ACCOUNT_NAME }}"
-            container_name       = "${{ secrets.AZURERM_CONTAINER_NAME }}"
+            resource_group_name  = "${{ secrets.STATE_RESOURCE_GROUP_NAME }}"
+            storage_account_name = "${{ secrets.STATE_STORAGE_ACCOUNT_NAME }}"
+            container_name       = "${{ secrets.STATE_CONTAINER_NAME }}"
             key                  = "${REPO_NAME}/${{ github.event.inputs.environment }}.tfstate"
           }
         }
