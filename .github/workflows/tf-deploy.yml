@@ -4,9 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'The environment to deploy to (dev, preprod, prod)'
+        description: 'Select the environment to deploy: (dev, staging, prod)'
         required: true
         default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
 
 jobs:
   terraform-execution:
@@ -25,7 +30,7 @@ jobs:
       id: set-working-directory
       run: |
         echo "## Setting Working Directory"
-        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        ENV_PATH="./environments"
         echo "## Changing to directory $ENV_PATH"
         cd $ENV_PATH || exit 1
         echo "## Current Directory"
@@ -36,7 +41,7 @@ jobs:
     - name: Create backend.tf
       run: |
         echo "## Creating backend.tf"
-        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        ENV_PATH="./environments"
         REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
         cat > ${ENV_PATH}/backend.tf << EOL
         terraform {
@@ -53,7 +58,7 @@ jobs:
     - name: Create terraform.tfvars
       run: |
         echo "## Creating terraform.tfvars"
-        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        ENV_PATH="./environments"
         echo "client_id = \"${{ secrets.ARM_CLIENT_ID }}\"" > ${ENV_PATH}/terraform.tfvars
         echo "client_secret = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> ${ENV_PATH}/terraform.tfvars
         echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> ${ENV_PATH}/terraform.tfvars
@@ -66,20 +71,19 @@ jobs:
     - name: Verify terraform.tfvars Location
       run: |
         echo "## Verifying terraform.tfvars Location"
-        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        ENV_PATH="./environments"
         echo "## Listing Files in $ENV_PATH"
         ls -la $ENV_PATH
 
     - name: Initialize Terraform
       run: |
         echo "## Initializing Terraform"
-        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
-        echo "## Changing to directory $ENV_PATH"
+        ENV_PATH="./environments"
         cd $ENV_PATH || exit 1
         echo "## Listing Files in $ENV_PATH"
         ls -la
         cat backend.tf
-        terraform init
+        terraform init || { echo "Terraform init failed"; exit 1; }
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -89,25 +93,16 @@ jobs:
     - name: Plan Terraform Changes
       run: |
         echo "## Planning Terraform Changes"
-        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
-        echo "## Environment Path: $ENV_PATH"
-        pwd
-        ls -la
-        cd $ENV_PATH
-        ls -la
-        terraform plan -var-file=terraform.tfvars -out=tfplan
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        ENV_PATH="./environments"
+        cd $ENV_PATH || exit 1
+        terraform plan -var-file=terraform.tfvars -out=tfplan || { echo "Terraform plan failed"; exit 1; }
         
     - name: Apply Terraform Changes
       run: |
         echo "## Applying Terraform Changes"
-        ENV_PATH="./environments/${{ github.event.inputs.environment }}"
-        cd $ENV_PATH
-        terraform apply -auto-approve tfplan
+        ENV_PATH="./environments"
+        cd $ENV_PATH || exit 1
+        terraform apply -auto-approve tfplan || { echo "Terraform apply failed"; exit 1; }
         echo "## Terraform Apply Completed"
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
