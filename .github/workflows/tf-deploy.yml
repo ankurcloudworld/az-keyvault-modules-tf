@@ -103,25 +103,20 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-  apply-changes:
-    needs: terraform-execution
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Manual Approval
-      if: github.event.inputs.environment != 'dev'
-      uses: peter-evans/enable-pending-approval@v1.0.0
+    - name: Approval before Apply
+      uses: peter-evans/enable-pending-approval@v2
       with:
-        approval_text: "Do you want to apply the Terraform changes?"
-        continue_button_text: "Yes, apply changes"
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        step-message: "Do you want to apply the Terraform changes?"
+        pending-comment: true
 
     - name: Apply Terraform Changes
+      if: steps.enable-pending-approval.outputs.approval == 'true'
       run: |
         echo "## Applying Terraform Changes"
         ENV_PATH="./environments"
-        cd $ENV_PATH || exit 1
-        terraform apply -auto-approve tfplan || { echo "Terraform apply failed"; exit 1; }
-        echo "## Terraform Apply Completed"
+        cd $ENV_PATH
+        terraform apply -auto-approve tfplan
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
