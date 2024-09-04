@@ -4,14 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Select the environment to deploy: (dev, staging, prod)'
+        description: 'The environment to deploy to (dev, preprod, prod)'
         required: true
         default: 'dev'
-        type: choice
-        options:
-          - dev
-          - staging
-          - prod
 
 jobs:
   terraform-execution:
