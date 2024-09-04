@@ -65,6 +65,11 @@ jobs:
         ENV_PATH="./environments"
         cd $ENV_PATH || exit 1
         terraform init || { echo "Terraform init failed"; exit 1; }
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
     - name: Plan Terraform Changes
       run: |
@@ -73,6 +78,11 @@ jobs:
         cd $ENV_PATH || exit 1
         terraform plan -var-file=terraform.tfvars -out=tfplan || { echo "Terraform plan failed"; exit 1; }
         echo "## Terraform Plan Completed"
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
     - name: Upload Terraform Plan as Artifact
       uses: actions/upload-artifact@v3
@@ -114,3 +124,8 @@ jobs:
         cd $ENV_PATH || exit 1
         terraform apply -auto-approve tfplan || { echo "Terraform apply failed"; exit 1; }
         echo "## Terraform Apply Completed"
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
