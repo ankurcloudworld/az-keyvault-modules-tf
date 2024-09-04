@@ -103,15 +103,14 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-    - name: Approval before Apply
-      uses: peter-evans/enable-pending-approval@v2
+    - name: Request Approval
+      uses: actions/manual-approval@v1
       with:
         repo-token: ${{ secrets.TOKEN }}
-        step-message: "Do you want to apply the Terraform changes?"
-        pending-comment: true
+        message: "Do you want to apply the Terraform changes? Please approve to continue."
 
     - name: Apply Terraform Changes
-      if: steps.enable-pending-approval.outputs.approval == 'true'
+      if: ${{ github.event.inputs.apply_confirmation == 'yes' }}
       run: |
         echo "## Applying Terraform Changes"
         ENV_PATH="./environments"
