@@ -37,6 +37,7 @@ jobs:
       run: |
         echo "## Creating backend.tf"
         ENV_PATH="./environments/${{ github.event.inputs.environment }}"
+        REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
         cat > ${ENV_PATH}/backend.tf << EOL
         terraform {
           backend "azurerm" {
