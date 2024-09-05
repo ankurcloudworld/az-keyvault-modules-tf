@@ -93,6 +93,7 @@ jobs:
   apply:
     runs-on: ubuntu-latest
     needs: init-and-plan  # Ensure 'init-and-plan' runs first
+    environment: ${{ github.event.inputs.environment }}  # Dynamically set the environment
 
     steps:
       - name: Checkout Code
