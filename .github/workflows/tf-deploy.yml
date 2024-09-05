@@ -92,8 +92,7 @@ jobs:
 
   apply:
     runs-on: ubuntu-latest
-    needs: plan  # This ensures the apply job waits for the plan job to finish
-
+    needs: init-and-plan  # Updated to reference the correct job name 'init-and-plan'
     steps:
     - name: Download Terraform Plan Artifact
       uses: actions/download-artifact@v3
