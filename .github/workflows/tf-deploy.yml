@@ -12,6 +12,14 @@ on:
           - dev
           - staging
           - prod
+      proceed_apply:
+        description: 'Would you like to apply the Terraform changes?'
+        required: true
+        default: 'no'
+        type: choice
+        options:
+          - yes
+          - no
 
 jobs:
   init-and-plan:
@@ -90,32 +98,10 @@ jobs:
           name: terraform-plan
           path: ./environments/tfplan
 
-  approval:
-    runs-on: ubuntu-latest
-    needs: init-and-plan  # Wait for init-and-plan job to complete
-
-    steps:
-      - name: Wait for Manual Approval
-        run: |
-          echo "Waiting for approval comment..."
-          while true; do
-            # Fetch comments from the workflow run using GitHub CLI (gh)
-            comments=$(gh api repos/${{ github.repository }}/issues/${{ github.run_id }}/comments)
-            echo "$comments" | grep -i "APPROVED" > /dev/null
-            if [ $? -eq 0 ]; then
-              echo "Approval received! Proceeding to next job."
-              break
-            else
-              echo "No approval yet. Sleeping for 60 seconds..."
-              sleep 60
-            fi
-          done
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}  # Authenticate gh CLI with GitHub token
-
   apply:
     runs-on: ubuntu-latest
-    needs: approval  # Wait for approval to complete
+    needs: init-and-plan  # Ensure 'init-and-plan' runs first
+    if: ${{ github.event.inputs.proceed_apply == 'yes' }}
 
     steps:
       - name: Checkout Code
