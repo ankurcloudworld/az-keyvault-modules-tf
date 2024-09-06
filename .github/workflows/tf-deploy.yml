@@ -111,7 +111,7 @@ jobs:
             fi
           done
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Authenticate gh CLI with GitHub token
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}  # Authenticate gh CLI with GitHub token
 
   apply:
     runs-on: ubuntu-latest
