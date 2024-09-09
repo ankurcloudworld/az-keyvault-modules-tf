@@ -15,11 +15,11 @@ on:
       proceed_apply:
         description: 'Would you like to apply the Terraform changes?'
         required: true
-        default: 'no'
+        default: 'false'
         type: choice
         options:
-          - yes
-          - no
+           - 'true'
+           - 'false'
 
 jobs:
   init-and-plan:
@@ -98,10 +98,13 @@ jobs:
           name: terraform-plan
           path: ./environments/tfplan
 
+      - name: Set Proceed Apply Variable
+        run: echo "PROCEED_APPLY=${{ github.event.inputs.proceed_apply }}" >> $GITHUB_ENV
+
   apply:
     runs-on: ubuntu-latest
     needs: init-and-plan
-    if: ${{ github.event.inputs.proceed_apply == 'yes' }}
+    if: env.PROCEED_APPLY == 'true'  # Checking for true/false
 
     steps:
       - name: Checkout Code
