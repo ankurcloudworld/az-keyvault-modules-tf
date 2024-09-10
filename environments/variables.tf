@@ -27,7 +27,7 @@ variable "object_id" {
 variable "resource_group_name" {
   description = "Name of the resource group"
   type        = string
-  default     = "sample-rg"
+  default     = "sample-rg-ankur"
 }
 
 variable "location" {
