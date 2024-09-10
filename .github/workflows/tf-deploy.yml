@@ -12,6 +12,11 @@ on:
           - dev
           - staging
           - prod
+      resource_name:
+        description: 'Enter the resource name to manage'
+        required: false
+        default: 'default_resource'
+      
       proceed_apply:
         description: 'Would you like to apply the Terraform changes?'
         required: true
@@ -45,13 +50,14 @@ jobs:
           echo "## Creating backend.tf"
           ENV_PATH="./environments"
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          RESOURCE_NAME="${{ github.event.inputs.resource_name || 'default_resource' }}
           cat > ${ENV_PATH}/backend.tf << EOL
           terraform {
             backend "azurerm" {
               resource_group_name  = "${{ secrets.STATE_RESOURCE_GROUP_NAME }}"
               storage_account_name = "${{ secrets.STATE_STORAGE_ACCOUNT_NAME }}"
               container_name       = "${{ secrets.STATE_CONTAINER_NAME }}"
-              key                  = "${REPO_NAME}/${{ github.event.inputs.environment }}.tfstate"
+              key                  = "${REPO_NAME}/${RESOURCE_NAME}-${{ github.event.inputs.environment }}.tfstate"
             }
           }
           EOL
