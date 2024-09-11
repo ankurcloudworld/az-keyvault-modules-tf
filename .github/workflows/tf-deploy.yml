@@ -197,12 +197,25 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-      - name: Destroy Terraform Resources
+      - name: Plan Terraform Destroy
         run: |
-          echo "## Destroying Terraform Resources"
+          echo "## Planning Terraform Destroy"
           ENV_PATH="./environments"
           cd "$ENV_PATH" || exit 1
-          terraform destroy -auto-approve || { echo "Terraform destroy failed"; exit 1; }
+          terraform plan -destroy -out=tfplan.destroy || { echo "Terraform destroy plan failed"; exit 1; }
+          echo "## Terraform Destroy Plan Completed"
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+      - name: Apply Terraform Destroy Plan
+        run: |
+          echo "## Applying Terraform Destroy Plan"
+          ENV_PATH="./environments"
+          cd "$ENV_PATH" || exit 1
+          terraform apply -auto-approve tfplan.destroy || { echo "Terraform destroy failed"; exit 1; }
           echo "## Terraform Destroy Completed"
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
