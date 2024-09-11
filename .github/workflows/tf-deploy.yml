@@ -25,7 +25,7 @@ on:
           - 'true'
           - 'false'
       proceed_destroy:
-        description: 'Would you like to destroy the Terraform resources? (This will only create a plan, not execute it)'
+        description: 'Would you like to destroy the Terraform resources?'
         required: true
         default: 'false'
         type: choice
@@ -36,7 +36,6 @@ on:
 jobs:
   init-and-plan:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -180,6 +179,12 @@ jobs:
         with:
           terraform_version: '1.4.0'
 
+      - name: Download Terraform Plan Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: terraform-plan
+          path: ./environments
+
       - name: Reinitialize Terraform (Destroy)
         run: |
           echo "## Reinitializing Terraform for Destroy"
@@ -192,21 +197,15 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-      - name: Plan Terraform Destroy
+      - name: Destroy Terraform Resources
         run: |
-          echo "## Planning Terraform Destroy"
+          echo "## Destroying Terraform Resources"
           ENV_PATH="./environments"
           cd "$ENV_PATH" || exit 1
-          terraform plan -destroy -var-file=terraform.tfvars -out=tfplan_destroy || { echo "Terraform destroy plan failed"; exit 1; }
-          echo "## Terraform Destroy Plan Completed"
+          terraform destroy -auto-approve || { echo "Terraform destroy failed"; exit 1; }
+          echo "## Terraform Destroy Completed"
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-
-      - name: Upload Terraform Destroy Plan as Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: terraform-destroy-plan
-          path: ./environments/tfplan_destroy
