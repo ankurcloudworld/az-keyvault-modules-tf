@@ -32,6 +32,11 @@ on:
         options:
           - 'true'
           - 'false'
+      destroy_confirmation:
+        description: 'Type "yes" to confirm the destroy operation after reviewing the plan'
+        required: false
+        default: ''
+        type: string
 
 jobs:
   init-and-plan:
@@ -165,7 +170,7 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-  destroy:
+  destroy-plan:
     runs-on: ubuntu-latest
     needs: init-and-plan
     if: github.event.inputs.proceed_destroy == 'true'
@@ -185,9 +190,9 @@ jobs:
           name: terraform-artifacts
           path: ./environments
 
-      - name: Reinitialize Terraform (Destroy)
+      - name: Reinitialize Terraform (Destroy Plan)
         run: |
-          echo "## Reinitializing Terraform for Destroy"
+          echo "## Reinitializing Terraform for Destroy Plan"
           ENV_PATH="./environments"
           cd "$ENV_PATH" || exit 1
           terraform init -upgrade || { echo "Terraform init failed"; exit 1; }
@@ -210,9 +215,47 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-      - name: Apply Terraform Destroy Plan
+      - name: Upload Destroy Plan as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-destroy-plan
+          path: ./environments
+
+  destroy-apply:
+    runs-on: ubuntu-latest
+    needs: destroy-plan
+    if: github.event.inputs.proceed_destroy == 'true' && github.event.inputs.destroy_confirmation == 'yes'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.4.0'
+
+      - name: Download Destroy Plan Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: terraform-destroy-plan
+          path: ./environments
+
+      - name: Reinitialize Terraform (Destroy Apply)
         run: |
-          echo "## Applying Terraform Destroy Plan"
+          echo "## Reinitializing Terraform for Destroy Apply"
+          ENV_PATH="./environments"
+          cd "$ENV_PATH" || exit 1
+          terraform init -upgrade || { echo "Terraform init failed"; exit 1; }
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+      - name: Apply Terraform Destroy
+        run: |
+          echo "## Applying Terraform Destroy"
           ENV_PATH="./environments"
           cd "$ENV_PATH" || exit 1
           terraform apply -auto-approve tfplan.destroy || { echo "Terraform destroy failed"; exit 1; }
