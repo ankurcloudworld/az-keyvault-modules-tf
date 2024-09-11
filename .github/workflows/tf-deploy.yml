@@ -117,8 +117,8 @@ jobs:
       - name: Upload Terraform Plan as Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: terraform-plan
-          path: ./environments/tfplan
+          name: terraform-artifacts
+          path: ./environments
 
   apply:
     runs-on: ubuntu-latest
@@ -137,7 +137,7 @@ jobs:
       - name: Download Terraform Plan Artifact
         uses: actions/download-artifact@v3
         with:
-          name: terraform-plan
+          name: terraform-artifacts
           path: ./environments
 
       - name: Reinitialize Terraform (Apply)
@@ -182,7 +182,7 @@ jobs:
       - name: Download Terraform Plan Artifact
         uses: actions/download-artifact@v3
         with:
-          name: terraform-plan
+          name: terraform-artifacts
           path: ./environments
 
       - name: Reinitialize Terraform (Destroy)
