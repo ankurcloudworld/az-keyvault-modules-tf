@@ -202,7 +202,7 @@ jobs:
           echo "## Planning Terraform Destroy"
           ENV_PATH="./environments"
           cd "$ENV_PATH" || exit 1
-          terraform plan -destroy -out=tfplan.destroy || { echo "Terraform destroy plan failed"; exit 1; }
+          terraform plan -destroy -var-file=terraform.tfvars -out=tfplan.destroy || { echo "Terraform destroy plan failed"; exit 1; }
           echo "## Terraform Destroy Plan Completed"
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
@@ -215,7 +215,7 @@ jobs:
           echo "## Applying Terraform Destroy Plan"
           ENV_PATH="./environments"
           cd "$ENV_PATH" || exit 1
-          terraform apply -auto-approve tfplan.destroy || { echo "Terraform destroy failed"; exit 1; }
+          terraform apply -var-file=terraform.tfvars -auto-approve tfplan.destroy || { echo "Terraform destroy failed"; exit 1; }
           echo "## Terraform Destroy Completed"
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
